@@ -1,60 +1,127 @@
-# On-path-attack
-Hands-on lab notes on path traversal vulnerabilities — setting up Burp Suite as an intercepting proxy to analyze traffic against OWASP Juice Shop.
-Overview
-Hands-on lab exploring how to set up and use an intercepting proxy to analyze web
-application traffic as a foundation for identifying path traversal (directory
-traversal) vulnerabilities. Performed against OWASP Juice Shop, a deliberately
-vulnerable web application used widely for security training, in a two-machine
-lab environment (Kali Linux attacker box + Windows target machine).
-Objective
-Path traversal vulnerabilities occur when an application uses unsanitized
-user input to construct file paths, allowing an attacker to escape the intended
-directory (e.g. using ../ sequences) and access files elsewhere on the server.
-Before this kind of manipulation is possible, an attacker needs full visibility
-into the HTTP requests a client sends — which is what this lab focused on
-building.
+Path Attacks Lab: A Comprehensive Security Assessment
 
-Environment
-	•	Attacker machine: Kali Linux (running Burp Suite Community Edition)
-	•	Target machine: Windows 10 (browsing OWASP Juice Shop at juiceshop.local)
-	•	Proxy tool: Burp Suite Community Edition v2022.12.5
-  
-Steps Performed
-	1.	Configured Burp Suite as an intercepting proxy
-Set up a proxy listener in Burp, first on loopback (127.0.0.1:8080), then
-bound to a specific network interface (10.1.16.66:8080) so it could accept
-traffic from the separate Windows target machine.
-	2.	Redirected target machine traffic through the proxy
-Used a PowerShell/batch script (newproxy.bat, served from
-http://10.1.16.66/newproxy.bat) to modify the Windows registry proxy
-settings (ProxyServer, ProxyEnable under
-HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Internet Settings),
-routing all browser HTTP traffic through the Kali Burp instance.
-	3.	Tuned Burp’s intercept rules
-Reviewed and adjusted the request-matching rules (file extension, HTTP
-method, target scope) so Burp captured relevant application traffic while
-filtering out noise like images, CSS, and JS.
-	4.	Generated traffic against OWASP Juice Shop
-Logged into juiceshop.local from the target browser to produce real
-authentication traffic for Burp to intercept.
-	5.	Reviewed captured requests in Burp’s HTTP History
-Confirmed successful interception of requests such as:
-	•	POST /rest/user/login → 401 (failed login attempt)
-	•	GET /rest/user/whoami → 200
-This validated that the proxy chain was working end-to-end — traffic from
-the target browser was visible and inspectable in Burp.
+Executive Summary
 
-Key Takeaway
-Traffic interception is the essential first step in testing for path traversal
-(and most other web app vulnerabilities). Without the ability to see and modify
-raw HTTP requests — including parameters that reference file paths or names —
-it’s not possible to test whether a server improperly resolves manipulated
-paths like ../../etc/passwd. This lab built that foundation: proxy setup,
-client redirection, and traffic capture/analysis in Burp Suite.
+Over the past weeks, I've been working through a hands-on cybersecurity lab focused on path traversal vulnerabilities and directory enumeration attacks. This project demonstrates my foundational understanding of web application security testing, my ability to use industry-standard penetration testing tools, and my commitment to building a career in cybersecurity—all while maintaining honest awareness of where I am in my learning journey.
 
-Next Steps
-	•	Identify endpoints in Juice Shop that accept file names/paths as parameters
-	•	Use Burp’s Repeater to inject ../ sequences into those parameters
-	•	Observe server responses to confirm whether directory traversal is possible
-	•	Document any successful traversal and the underlying cause (lack of input
-sanitization, missing path normalization, etc.)
+Project Overview
+
+The Challenge
+
+I conducted a security assessment of the OWASP Juice Shop, a deliberately vulnerable web application designed for security training. My objective was to identify and document path-based vulnerabilities that could allow unauthorized access to restricted files and directories.
+
+The Approach
+
+I configured and utilized Burp Suite Community Edition (v2022.12.5), the industry-standard web application security testing platform, to:
+
+Intercept and analyze HTTP/HTTPS traffic
+Identify potential path traversal vectors
+Test for improper input validation on file paths and directory navigation
+Document findings and vulnerability chains
+Technical Implementation
+
+1. Environment Setup
+
+Target Application: OWASP Juice Shop (intentionally vulnerable e-commerce platform)
+Testing Platform: Burp Suite Community Edition v2022.12.5
+Proxy Configuration: Configured proxy listener on 127.0.0.1:8080 with loopback-only binding for secure, isolated testing
+Operating System: Kali Linux (penetration testing distribution)
+2. Proxy Configuration & Traffic Interception
+
+I configured Burp Suite's proxy listener with the following specifications:
+
+Binding: Port 8080, restricted to localhost (127.0.0.1)
+Request Handling: Enabled interception of client requests based on specific rules
+TLS/SSL Configuration: Implemented certificate handling for HTTPS traffic analysis
+Intercept Rules: Configured selective interception based on:
+File extensions
+HTTP methods (GET, POST, etc.)
+URL patterns
+Request parameters
+This setup allows me to capture, analyze, and modify requests in real-time—critical for identifying how the application handles user input in file paths and directory references.
+
+3. Vulnerability Assessment
+
+From my initial scans (visible in the scan results), I identified multiple endpoints and analyzed them for:
+
+Directory Traversal: Testing for ../ sequences that might escape intended directories
+Path Normalization Issues: Checking how the application processes encoded paths
+Access Control Bypass: Attempting to reach resources outside the intended scope
+File Enumeration: Identifying which files and directories are accessible through path manipulation
+What I've Learned (Honestly)
+
+Strengths & Progress
+
+✅ Technical Competencies Developed:
+
+Hands-on experience with Burp Suite (the gold standard in penetration testing)
+Understanding of HTTP request/response cycles and how web applications handle file paths
+Ability to configure security testing infrastructure properly
+Familiarity with common vulnerability patterns (OWASP Top 10 - A01:2021 Broken Access Control)
+Working knowledge of proxy-based traffic interception and analysis
+✅ Professional Skills:
+
+Learning to document security findings clearly
+Understanding the importance of controlled testing environments
+Building habits around careful, methodical security analysis
+Recognizing the ethical responsibility of security testing
+Where I'm Still Growing
+
+🟡 Areas of Continued Development:
+
+Exploitation Depth: While I understand path traversal concepts, I'm still developing expertise in chaining multiple vulnerabilities together
+Advanced Burp Suite Features: I'm comfortable with core proxy functionality but still learning the Scanner, Intruder, and Repeater tools for more sophisticated testing
+Vulnerability Remediation: Understanding how to fix these vulnerabilities is something I'm actively studying alongside learning to find them
+Real-World Application Context: Most of my experience is in controlled lab environments; understanding vulnerabilities in complex production systems requires continued growth
+Why This Background Matters
+
+Coming from a healthcare background, I bring valuable perspectives to cybersecurity:
+
+Understanding Compliance & Risk: Healthcare shaped my mindset around data protection, regulatory requirements (HIPAA), and the real consequences of security failures
+Attention to Detail: Medical precision translates directly to security work—one missed vulnerability can have serious consequences
+Responsibility Mindset: In healthcare, errors cost lives. In security, errors cost companies and users. I approach both with appropriate gravity
+This career transition isn't a pivot away from my values—it's applying them to a field where they're equally critical.
+
+What This Project Demonstrates
+
+For Employers, This Shows I Can:
+
+✅ Learn and use complex security tools independently
+✅ Set up secure testing environments correctly
+✅ Think like an attacker (essential for defensive security)
+✅ Document work in a professional manner
+✅ Understand web application security fundamentals
+✅ Commit to continuous learning in a rapidly evolving field
+What I'm NOT Claiming:
+
+❌ I'm not an expert penetration tester (I'm 2-3 months in)
+❌ I haven't worked on production systems yet
+❌ I don't have years of hands-on experience
+❌ I'm not ready to lead security initiatives alone
+What I AM:
+
+✅ A dedicated learner with real hands-on experience
+✅ Someone who understands the fundamentals correctly
+✅ Committed to ethical security practices
+✅ Ready to grow into a junior security role or apprenticeship
+✅ Someone who's honest about where I am in my journey
+Next Steps in My Learning
+
+I'm actively working on:
+
+Completing the OWASP Top 10 vulnerabilities through practical lab work
+Pursuing industry certifications (CompTIA Security+, CEH foundations)
+Building a portfolio of documented labs and write-ups
+Contributing to open-source security projects to gain real-world experience
+Engaging with the security community through forums, CTF (Capture The Flag) competitions, and local meetups
+Closing Statement
+
+This project represents my honest starting point in cybersecurity. I'm not claiming mastery—I'm demonstrating:
+
+Technical competence in using professional tools
+Conceptual understanding of common vulnerabilities
+Professional discipline in documentation and approach
+Genuine commitment to the field, despite being early in my career journey
+I'm looking for opportunities where I can continue this learning curve in a professional environment—whether that's a junior security analyst role, a security apprenticeship, or a position supporting a larger security team. I bring the work ethic, attention to detail, and ethical foundation; I'm ready to build the specialized experience.
+
+If you'd like to discuss this project, my approach to learning, or how my healthcare background brings unique perspective to security, I'd welcome the conversation.
